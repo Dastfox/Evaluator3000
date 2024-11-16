@@ -1,0 +1,115 @@
+// progress-chart.component.scss
+.container {
+  padding: 20px;
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-field {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.table-container {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: visible;
+  margin: 0;
+  padding-bottom: 8px;
+}
+
+table {
+  width: 100%;
+}
+
+// Header cell text wrapping and sizing
+.mat-mdc-header-cell {
+  .header-content {
+    width: 200px; // Wider fixed width for header cells
+    min-width: 200px;
+    white-space: normal; // Allow text wrapping
+    line-height: 1.4;
+    padding: 12px 8px;
+  }
+}
+
+// Fixed first column styles
+.mat-mdc-table .mat-mdc-column-student,
+.mat-mdc-table .mat-mdc-column-competency {
+  position: sticky;
+  left: 0;
+  background: white;
+  z-index: 1;
+  min-width: 250px; // Wider for competency description
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 8px;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(0,0,0,0.08), transparent);
+  }
+}
+
+.mat-mdc-header-cell.mat-mdc-column-student,
+.mat-mdc-header-cell.mat-mdc-column-competency {
+  z-index: 2;
+  background: white;
+}
+
+// Competency description cell
+.competency-description {
+  white-space: normal;
+  line-height: 1.4;
+  padding-right: 16px;
+}
+
+.mat-column-actions {
+  width: 80px;
+  text-align: center;
+}
+
+mat-card {
+  margin-bottom: 20px;
+  padding: 20px;
+}
+
+mat-form-field {
+  width: 100%;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+mat-card-header {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.mat-mdc-table {
+  width: 100%;
+  background: white;
+}
+
+.mat-mdc-header-cell {
+  background: white;
+  padding: 16px;
+}
+
+.mat-mdc-cell {
+  padding: 16px;
+}
+
+// Ensure grade inputs don't stretch the columns too much
+.grade-input {
+  width: 80px;
+  min-width: 80px;
+}

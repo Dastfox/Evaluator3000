@@ -1,0 +1,144 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Competencies</mat-card-title>
+      <span class="spacer"></span>
+      <button mat-raised-button color="primary" (click)="openAddDialog()">
+        <mat-icon>add</mat-icon>
+        Add Competency
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-form-field class="search-field">
+        <mat-label>Search Competencies</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Search..." #input>
+      </mat-form-field>
+
+      <table mat-table [dataSource]="dataSource">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let competency">{{ competency.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let competency">{{ competency.description }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>Category</th>
+          <td mat-cell *matCellDef="let competency">{{ competency.category }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="phase">
+          <th mat-header-cell *matHeaderCellDef>Phases</th>
+          <td mat-cell *matCellDef="let competency">
+            <mat-chip-listbox>
+              <mat-chip *ngFor="let phase of competency.phases">
+                {{ phase }}
+              </mat-chip>
+            </mat-chip-listbox>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let competency">
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="editCompetency(competency)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="deleteCompetency(competency)">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="5">No competencies found matching the filter "{{ input.value }}"</td>
+        </tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"
+                     aria-label="Select page of competencies">
+      </mat-paginator>
+      </mat-card-content>
+  </mat-card>
+</div>
+
+<ng-template #editDialog>
+  <h2 mat-dialog-title>{{ dialogData.isNew ? 'Add' : 'Edit' }} Competency</h2>
+  <mat-dialog-content>
+    <form [formGroup]="competencyForm">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" required>
+        <mat-error *ngIf="competencyForm.get('name')?.hasError('required')">
+          Name is required
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" required></textarea>
+        <mat-error *ngIf="competencyForm.get('description')?.hasError('required')">
+          Description is required
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Category</mat-label>
+        <input matInput
+               formControlName="category"
+               [matAutocomplete]="categoryAuto"
+               required>
+        <mat-autocomplete #categoryAuto="matAutocomplete">
+          <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
+            {{ category }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <div formArrayName="phases">
+        <div class="phase-container" *ngFor="let phase of phasesFormArray.controls; let i = index" [formGroupName]="i">
+          <mat-form-field appearance="outline">
+            <mat-label>Phase {{ i + 1 }}</mat-label>
+            <input matInput
+                   [matAutocomplete]="phaseAuto"
+                   formControlName="phase">
+            <mat-autocomplete #phaseAuto="matAutocomplete">
+              <mat-option *ngFor="let phase of getFilteredPhases(i) | async" [value]="phase">
+                {{ phase }}
+              </mat-option>
+            </mat-autocomplete>
+            <button matSuffix mat-icon-button (click)="removePhase(i)" *ngIf="i > 0">
+              <mat-icon>remove</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
+
+        <button mat-stroked-button type="button" (click)="addPhase()" class="add-phase-btn">
+          <mat-icon>add</mat-icon>
+          Add Another Phase
+        </button>
+      </div>
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="primary" (click)="saveCompetency()" [disabled]="!competencyForm.valid">
+      Save
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+

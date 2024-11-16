@@ -1,16 +1,21 @@
 import {Injectable} from '@angular/core';
 import {LocalStorageService} from './local-storage.service';
+import {Subject} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImportExportService {
 
+  private reloadDataSubject = new Subject<void>();
+  reloadData$ = this.reloadDataSubject.asObservable();
+
   constructor(private _localStorageService: LocalStorageService) {
 
   }
 
   public exportData(): void {
+    console.log('Exporting data', this._localStorageService.getAllItems());
     const data = this._localStorageService.getAllItems();
     const dataStr = JSON.stringify(data);
     const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
@@ -22,6 +27,7 @@ export class ImportExportService {
   }
 
   public importDataFromFile(file: File): void {
+    console.log(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       if (!e?.target?.result) {
@@ -39,5 +45,6 @@ export class ImportExportService {
     for (const key in dataObj) {
       this._localStorageService.setItem(key, dataObj[key]);
     }
+    this.reloadDataSubject.next();
   }
 }

@@ -1,0 +1,53 @@
+<div class="sidenav-container">
+  <button class="toggle-btn"
+          [class.hidden]="isMenuVisible || isMenuPinned"
+          (click)="toggleMenu()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <div
+    class="sidenav"
+    [class.expanded]="isMenuVisible"
+    [class.pinned]="isMenuPinned"
+    (mouseenter)="onMenuEnter()"
+    (mouseleave)="onMenuLeave()">
+
+    <div class="nav-content">
+
+      <div class="nav-list">
+        <a class="nav-item" routerLink="/students" routerLinkActive="active">
+          <mat-icon>people</mat-icon>
+          <span>Students</span>
+        </a>
+
+        <a class="nav-item" routerLink="/progress-chart" routerLinkActive="active">
+          <mat-icon>trending_up</mat-icon>
+          <span>Progress Chart</span>
+        </a>
+
+        <a class="nav-item" routerLink="/edit-competencies" routerLinkActive="active">
+          <mat-icon>edit</mat-icon>
+          <span>Edit Competencies</span>
+        </a>
+      </div>
+
+      <div class="action-buttons">
+        <button mat-stroked-button (click)="onImport()">
+          <mat-icon>download</mat-icon>
+          <span>Import</span>
+        </button>
+
+        <button mat-stroked-button (click)="onExport()">
+          <mat-icon>upload</mat-icon>
+          <span>Export</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="hidden-file-input" style="display: none">
+  <input type="file"
+         style="display: none"
+         (change)="onJsonFileSelected($event)"
+         accept=".json">
+</div>

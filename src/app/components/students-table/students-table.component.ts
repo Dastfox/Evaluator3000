@@ -1,16 +1,20 @@
-import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatDialog} from '@angular/material/dialog';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {Student} from '../../models/student';
 import {LocalStorageService} from '../../services/local-storage.service';
+import {ImportExportService} from '../../services/import-export.service';
+import {Subject, takeUntil} from 'rxjs';
 
 @Component({
   selector: 'app-student-list',
   templateUrl: "students-table.component.html",
   styleUrls: ["students-table.component.scss"]
 })
-export class StudentTableComponent implements OnInit {
+export class StudentTableComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+
   @ViewChild('editDialog') editDialog!: TemplateRef<any>;
   dialogData: { isNew: boolean; student?: Student } = {isNew: true};
 
@@ -21,7 +25,8 @@ export class StudentTableComponent implements OnInit {
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
-    private _localStorageService: LocalStorageService
+    private _localStorageService: LocalStorageService,
+    private _importExportService: ImportExportService
   ) {
     this.dataSource = new MatTableDataSource<Student>([]);
 
@@ -38,6 +43,18 @@ export class StudentTableComponent implements OnInit {
   ngOnInit() {
     // Initialize with sample data or fetch from service
     this.loadStudents();
+
+    // Subscribe to reload trigger
+    this._importExportService.reloadData$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadStudents();
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   createStudentForm(): FormGroup {
@@ -70,7 +87,7 @@ export class StudentTableComponent implements OnInit {
     this.studentForm.reset();
     this.dialogData = {isNew: true};
     this.dialog.open(this.editDialog, {
-      width: '400px'
+      width: '500px'
     });
   }
 
@@ -82,7 +99,7 @@ export class StudentTableComponent implements OnInit {
 
     this.dialogData = {isNew: false, student};
     this.dialog.open(this.editDialog, {
-      width: '400px'
+      width: '500px'
     });
   }
 
@@ -123,13 +140,15 @@ export class StudentTableComponent implements OnInit {
   }
 
   deleteStudent(student: Student) {
-    // Implement delete confirmation and logic
-    console.log('Deleting student:', student);
+    const index = this.dataSource.data.findIndex(s => s.id === student.id);
+    if (index !== -1) {
+      this.dataSource.data.splice(index, 1);
+      this._localStorageService.setItem('students', this.dataSource.data);
+      this.loadStudents(); // Reload the list
+    }
   }
 
   private loadStudents() {
-    // Implement loading logic here
-    // This is where you'd typically call your service
     this.dataSource.data = this._localStorageService.getItem('students') || [];
   }
 }

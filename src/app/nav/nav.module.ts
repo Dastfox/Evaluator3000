@@ -6,10 +6,10 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
-import { NavComponent } from '../components/nav-bar/nav-bar.component';
+import { SideNavComponent } from '../components/side-nav/side-nav.component';
 
 @NgModule({
-  declarations: [NavComponent],
+  declarations: [SideNavComponent],
   imports: [
     CommonModule,
     RouterModule,
@@ -17,6 +17,6 @@ import { NavComponent } from '../components/nav-bar/nav-bar.component';
     MatButtonModule,
     MatIconModule
   ],
-  exports: [NavComponent]
+  exports: [SideNavComponent]
 })
 export class NavModule { }

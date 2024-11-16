@@ -2,6 +2,8 @@ import {Component} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {NavModule} from './nav/nav.module';
 import {StudentTableModule} from './students-table/students-table.module';
+import {CompetenciesTableModule} from './competencies-table/competencies-table.module';
+import {ProgressChartModule} from './progress-chart/progress-chart.module';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +12,8 @@ import {StudentTableModule} from './students-table/students-table.module';
     RouterOutlet,
     NavModule,
     StudentTableModule,
+    CompetenciesTableModule,
+    ProgressChartModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
