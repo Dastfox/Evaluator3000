@@ -7,6 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { SideNavComponent } from '../components/side-nav/side-nav.component';
+import {MatFormField} from '@angular/material/form-field';
+import {MatOption, MatSelect} from '@angular/material/select';
 
 @NgModule({
   declarations: [SideNavComponent],
@@ -15,7 +17,10 @@ import { SideNavComponent } from '../components/side-nav/side-nav.component';
     RouterModule,
     MatToolbarModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatFormField,
+    MatSelect,
+    MatOption
   ],
   exports: [SideNavComponent]
 })

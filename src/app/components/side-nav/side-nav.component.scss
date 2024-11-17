@@ -148,3 +148,22 @@
     margin-bottom: 24px;
   }
 }
+
+.language-switcher {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 0 16px;
+  align-items: center;
+
+  mat-icon {
+    opacity: 0.8;
+    color: #4b5563;
+  }
+
+  span {
+    font-size: 14px;
+    color: #4b5563;
+  }
+}

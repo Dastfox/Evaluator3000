@@ -16,6 +16,8 @@ import {
 import {MatInput, MatInputModule} from '@angular/material/input';
 import {MatSlideToggle, MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatCard} from '@angular/material/card';
+import {MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 
 @NgModule({
@@ -43,6 +45,8 @@ import {MatCard} from '@angular/material/card';
     MatRowDef,
     MatSlideToggleModule,
     MatCard,
+    MatIconButton,
+    MatIcon,
   ],
   exports: [
     ProgressChartComponent

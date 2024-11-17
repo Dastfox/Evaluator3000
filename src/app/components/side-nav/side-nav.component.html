@@ -31,6 +31,16 @@
         </a>
       </div>
 
+<!--      <div class="language-switcher">-->
+<!--        <mat-form-field>-->
+<!--          <mat-select [(value)]="selectedLanguage" (selectionChange)="onLanguageChange($event)">-->
+<!--            <mat-option *ngFor="let language of languages" [value]="language.label">-->
+<!--              {{ language.label }}-->
+<!--            </mat-option>-->
+<!--          </mat-select>-->
+<!--        </mat-form-field>-->
+<!--      </div>-->
+
       <div class="action-buttons">
         <button mat-stroked-button (click)="onImport()">
           <mat-icon>download</mat-icon>
@@ -43,6 +53,7 @@
         </button>
       </div>
     </div>
+
   </div>
 </div>
 <div class="hidden-file-input" style="display: none">

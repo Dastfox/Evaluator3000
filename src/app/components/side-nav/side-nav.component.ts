@@ -1,6 +1,8 @@
 import {Component, ElementRef, HostListener} from '@angular/core';
-import {trigger, state, style, animate, transition} from '@angular/animations';
+import {animate, state, style, transition, trigger} from '@angular/animations';
 import {ImportExportService} from '../../services/import-export.service';
+import {MatSelectChange} from '@angular/material/select';
+import {LocalStorageService} from '../../services/local-storage.service';
 
 @Component({
   selector: 'app-side-nav',
@@ -24,12 +26,20 @@ import {ImportExportService} from '../../services/import-export.service';
 export class SideNavComponent {
   isMenuVisible = false;
   isMenuPinned = false;
+  selectedLanguage = 'en';
+  languages = [
+    {value: 'en', label: 'English'},
+    {value: 'fr', label: 'Français'}
+  ];
   private hideTimeout: any;
 
   constructor(
+    private _localStorageService: LocalStorageService,
     private _importExportService: ImportExportService,
     private elementRef: ElementRef
   ) {
+
+    this.selectedLanguage = this._localStorageService.getItem('language') || 'fr';
   }
 
   @HostListener('document:click', ['$event'])
@@ -83,5 +93,10 @@ onJsonFileSelected(event: Event): void {
   toggleMenu() {
     this.isMenuPinned = !this.isMenuPinned;
     this.isMenuVisible = this.isMenuPinned;
+  }
+
+  onLanguageChange(event: MatSelectChange) {
+    this._localStorageService.setItem('language', event.value);
+    this.selectedLanguage = event.value;
   }
 }

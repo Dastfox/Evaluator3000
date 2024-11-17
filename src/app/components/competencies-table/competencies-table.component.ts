@@ -7,6 +7,7 @@ import {map, startWith} from 'rxjs/operators';
 import {LocalStorageService} from '../../services/local-storage.service';
 import {Competency} from '../../models/competency';
 import {ImportExportService} from '../../services/import-export.service';
+import {MatPaginator} from '@angular/material/paginator';
 
 @Component({
   selector: 'app-competencies-table',
@@ -17,9 +18,11 @@ import {ImportExportService} from '../../services/import-export.service';
 export class CompetenciesTableComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   @ViewChild('editDialog') editDialog!: TemplateRef<any>;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
 
   dialogData: { isNew: boolean; competency?: Competency } = {isNew: true};
-  displayedColumns: string[] = ['name', 'description', 'category', 'phase', 'actions'];
+  displayedColumns: string[] = ['description', 'category', 'phase', 'actions'];
   dataSource: MatTableDataSource<Competency>;
   competencyForm: FormGroup;
 
@@ -35,6 +38,7 @@ export class CompetenciesTableComponent implements OnInit, OnDestroy {
     private _localStorageService: LocalStorageService,
     private _importExportService: ImportExportService
   ) {
+
     this.dataSource = new MatTableDataSource<Competency>([]);
     this.competencyForm = this.createCompetencyForm();
 
@@ -53,11 +57,17 @@ export class CompetenciesTableComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.loadCompetencies();
       });
+
+    // Initialize paginator after view is initialized
+    setTimeout(() => {
+      this.dataSource.paginator = this.paginator;
+    });
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.paginator) this.dataSource.paginator = this.paginator;
   }
 
   get phasesFormArray() {
@@ -161,7 +171,6 @@ export class CompetenciesTableComponent implements OnInit, OnDestroy {
     });
 
     this.competencyForm.patchValue({
-      name: competency.name,
       description: competency.description,
       category: competency.category
     });
@@ -181,7 +190,6 @@ export class CompetenciesTableComponent implements OnInit, OnDestroy {
 
       const competencyData: Competency = {
         id: uuid,
-        name: formValue.name,
         description: formValue.description,
         category: formValue.category,
         phases: formValue.phases.map((p: any) => p.phase)

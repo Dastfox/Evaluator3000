@@ -90,6 +90,14 @@ export class LocalStorageService {
     }
   }
 
+  setLanguage(language: string): void {
+    this.setItem('language', language);
+  }
+
+  getLanguage(): string {
+    return this.getItem('language') || 'fr';
+  }
+
   private getErrorMessage(error: unknown): string {
     if (error instanceof Error) return error.message;
     return String(error);

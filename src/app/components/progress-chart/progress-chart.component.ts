@@ -6,10 +6,6 @@ import {LocalStorageService} from '../../services/local-storage.service';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 
-interface CompetencyFilters {
-  categories: string[];
-  phases: string[];
-}
 
 @Component({
   selector: 'app-competency-matrix',
@@ -76,6 +72,7 @@ interface CompetencyFilters {
                 </div>
               </th>
               <td mat-cell *matCellDef="let student">
+                <!-- Edit mode -->
                 <mat-form-field class="grade-input">
                   <input matInput
                          type="number"
@@ -84,6 +81,7 @@ interface CompetencyFilters {
                          [value]="getGrade(student, comp)"
                          (change)="updateGrade($event, student, comp)">
                 </mat-form-field>
+
               </td>
             </ng-container>
 
@@ -114,14 +112,31 @@ interface CompetencyFilters {
             <ng-container matColumnDef="grade">
               <th mat-header-cell *matHeaderCellDef>Grade</th>
               <td mat-cell *matCellDef="let competency">
-                <mat-form-field class="grade-input">
+                <mat-form-field class="grade-input" *ngIf="editMode">
                   <input matInput
                          type="number"
                          min="0"
                          max="100"
                          [value]="getGradeForSelectedStudent(competency)"
                          (change)="updateGradeForSelectedStudent($event, competency)">
+                  <button mat-icon-button (click)="editMode = false">
+                    <mat-icon>edit</mat-icon>
+                  </button>
                 </mat-form-field>
+                <!-- Display mode -->
+                <ng-container *ngIf="!editMode">
+                  <span class="grade-status" [ngClass]="{
+                    'non-evalue': getGradeForSelectedStudent(competency) === 0,
+                    'atteind': getGradeForSelectedStudent(competency) === 100,
+                    'non-atteind': getGradeForSelectedStudent(competency) > 0 && getGradeForSelectedStudent(competency) <= 60,
+                    'partiellement': getGradeForSelectedStudent(competency) > 60 && getGradeForSelectedStudent(competency) < 100
+                  }">
+                    {{ getGradeDisplayText(getGradeForSelectedStudent(competency)) }}
+                  </span>
+                  <button mat-icon-button (click)="editMode = true">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </ng-container>
               </td>
             </ng-container>
 
@@ -136,6 +151,8 @@ interface CompetencyFilters {
 })
 export class ProgressChartComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+
+  editMode = false;
 
   students: Student[] = [];
   competencies: Competency[] = [];
@@ -259,6 +276,7 @@ export class ProgressChartComponent implements OnInit, OnDestroy {
   updateGradeForSelectedStudent(event: Event, competency: Competency) {
     const value = Number((event.target as HTMLInputElement).value);
     this.saveGrade(this.selectedStudentControl.value, competency, value);
+    this.editMode = false;
   }
 
   private saveGrade(studentId: string, competency: Competency, value: number) {
@@ -308,5 +326,12 @@ export class ProgressChartComponent implements OnInit, OnDestroy {
 
     // Save to local storage
     this.localStorageService.setItem('students', updatedStudents);
+  }
+
+  getGradeDisplayText(value: number): string {
+    if (value === 0) return 'Non évalué';
+    if (value === 100) return 'Atteind';
+    if (value <= 60) return 'Non Atteinds';
+    return 'Partiellement Atteinds';
   }
 }

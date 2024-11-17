@@ -16,11 +16,6 @@
       </mat-form-field>
 
       <table mat-table [dataSource]="dataSource">
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Name</th>
-          <td mat-cell *matCellDef="let competency">{{ competency.name }}</td>
-        </ng-container>
-
         <ng-container matColumnDef="description">
           <th mat-header-cell *matHeaderCellDef>Description</th>
           <td mat-cell *matCellDef="let competency">{{ competency.description }}</td>
@@ -69,10 +64,8 @@
         </tr>
       </table>
 
-      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"
-                     aria-label="Select page of competencies">
-      </mat-paginator>
-      </mat-card-content>
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of competencies"></mat-paginator>
+    </mat-card-content>
   </mat-card>
 </div>
 
@@ -80,14 +73,6 @@
   <h2 mat-dialog-title>{{ dialogData.isNew ? 'Add' : 'Edit' }} Competency</h2>
   <mat-dialog-content>
     <form [formGroup]="competencyForm">
-      <mat-form-field appearance="outline">
-        <mat-label>Name</mat-label>
-        <input matInput formControlName="name" required>
-        <mat-error *ngIf="competencyForm.get('name')?.hasError('required')">
-          Name is required
-        </mat-error>
-      </mat-form-field>
-
       <mat-form-field appearance="outline">
         <mat-label>Description</mat-label>
         <textarea matInput formControlName="description" required></textarea>
