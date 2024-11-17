@@ -24,42 +24,31 @@ jobs:
     - name: Build
       run: npm run build --configuration=production
 
-    - name: Download static server
+    - name: Setup release
       run: |
-        mkdir -p dist/*/server
-        # Download miniserve for different platforms
-        curl -L https://github.com/svenstaro/miniserve/releases/download/v0.25.0/miniserve-0.25.0-x86_64-pc-windows-msvc.exe -o dist/*/server/server.exe
-        curl -L https://github.com/svenstaro/miniserve/releases/download/v0.25.0/miniserve-0.25.0-x86_64-apple-darwin -o dist/*/server/server-mac
-        curl -L https://github.com/svenstaro/miniserve/releases/download/v0.25.0/miniserve-0.25.0-x86_64-unknown-linux-gnu -o dist/*/server/server-linux
-        chmod +x dist/*/server/server-mac dist/*/server/server-linux
+        BUILD_DIR=$(find dist -mindepth 1 -maxdepth 1 -type d)
 
-    - name: Create start scripts
-      run: |
-        # Windows batch script
-        cat > dist/*/start.bat << 'EOL'
-        @echo off
+        # Create server directory and download miniserve
+        mkdir -p "$BUILD_DIR/server"
+        curl -L https://github.com/svenstaro/miniserve/releases/download/v0.25.0/miniserve-0.25.0-x86_64-pc-windows-msvc.exe -o "$BUILD_DIR/server/server.exe"
+
+        # Create start.bat
+        echo "@echo off
         echo Starting local server...
         echo Opening http://localhost:8000 in your browser
         start http://localhost:8000
-        server\server.exe --index index.html --port 8000
-        EOL
+        server\server.exe --index index.html --port 8000" > "$BUILD_DIR/start.bat"
 
-        # Simple README
-        cat > dist/*/README.txt << 'EOL'
-        To run the application:
+        # Create README
+        echo "To run the application:
 
-        Windows:
         1. Double-click start.bat
         2. Browser will open automatically to http://localhost:8000
 
-        The app window should open automatically in your default browser.
-        To stop: Close the black command window
-        EOL
+        To stop: Close the black command window" > "$BUILD_DIR/README.txt"
 
-    - name: Zip Windows version
-      run: |
-        cd dist/*
-        zip -r ../../release-windows.zip . -x "server/server-mac" -x "server/server-linux"
+        # Create zip
+        zip -r release-windows.zip "$BUILD_DIR"/*
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -72,9 +61,9 @@ jobs:
         body: |
           Release ${{ github.ref_name }}
 
-          ### Running the app (Windows)
+          ### Running the app
           1. Download and extract release-windows.zip
           2. Double-click start.bat
           3. The app will open automatically in your browser
-          
-          No installation needed! Just double-click and go.
+
+          No installation needed!
