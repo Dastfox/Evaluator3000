@@ -24,36 +24,90 @@ jobs:
     - name: Build
       run: npm run build --configuration=production
 
-    - name: Setup release
+    - name: Setup releases
       run: |
         BUILD_DIR=$(find dist -mindepth 1 -maxdepth 1 -type d)
 
-        # Create server directory and download miniserve
+        # Create server directories for each platform
         mkdir -p "$BUILD_DIR/server"
-        curl -L https://github.com/svenstaro/miniserve/releases/download/v0.25.0/miniserve-0.25.0-x86_64-pc-windows-msvc.exe -o "$BUILD_DIR/server/server.exe"
 
-        # Create start.bat
+        # Download miniserve for each platform
+        curl -L https://github.com/svenstaro/miniserve/releases/download/v0.25.0/miniserve-0.25.0-x86_64-pc-windows-msvc.exe -o "$BUILD_DIR/server/server.exe"
+        curl -L https://github.com/svenstaro/miniserve/releases/download/v0.25.0/miniserve-0.25.0-x86_64-apple-darwin -o "$BUILD_DIR/server/server-mac"
+        curl -L https://github.com/svenstaro/miniserve/releases/download/v0.25.0/miniserve-0.25.0-x86_64-unknown-linux-gnu -o "$BUILD_DIR/server/server-linux"
+
+        # Make Unix executables actually executable
+        chmod +x "$BUILD_DIR/server/server-mac" "$BUILD_DIR/server/server-linux"
+
+        # Create Windows start.bat
         echo "@echo off
         echo Starting local server...
         echo Opening http://localhost:8000 in your browser
         start http://localhost:8000
         server\server.exe --index index.html --port 8000" > "$BUILD_DIR/start.bat"
 
+        # Create Unix start.sh
+        echo '#!/bin/bash
+
+        # Detect OS
+        case "$(uname -s)" in
+            Darwin*)    SERVER="./server/server-mac" ;;
+            Linux*)     SERVER="./server/server-linux" ;;
+            *)         echo "Unsupported OS" && exit 1 ;;
+        esac
+
+        echo "Starting local server..."
+
+        # Try to open browser based on OS
+        case "$(uname -s)" in
+            Darwin*)    (sleep 1 && open http://localhost:8000) & ;;
+            Linux*)     (sleep 1 && xdg-open http://localhost:8000) & ;;
+        esac
+
+        $SERVER --index index.html --port 8000' > "$BUILD_DIR/start.sh"
+
+        chmod +x "$BUILD_DIR/start.sh"
+
         # Create README
         echo "To run the application:
 
+        Windows:
         1. Double-click start.bat
-        2. Browser will open automatically to http://localhost:8000
 
-        To stop: Close the black command window" > "$BUILD_DIR/README.txt"
+        Mac/Linux:
+        1. Double-click start.sh
+           (If that doesn't work, open terminal and run: ./start.sh)
 
-        # Create zip
-        zip -r release-windows.zip "$BUILD_DIR"/*
+        The app will open automatically in your browser at http://localhost:8000
+
+        To stop:
+        - Windows: Close the black command window
+        - Mac/Linux: Press Ctrl+C in the terminal" > "$BUILD_DIR/README.txt"
+
+        # Create platform-specific zips
+        cp -r "$BUILD_DIR" windows-build
+        cp -r "$BUILD_DIR" mac-build
+        cp -r "$BUILD_DIR" linux-build
+
+        # Windows zip (remove Unix files)
+        rm windows-build/server/server-mac windows-build/server/server-linux windows-build/start.sh
+        zip -r release-windows.zip windows-build/*
+
+        # Mac zip (remove Windows/Linux files)
+        rm mac-build/server/server.exe mac-build/server/server-linux mac-build/start.bat
+        zip -r release-mac.zip mac-build/*
+
+        # Linux zip (remove Windows/Mac files)
+        rm linux-build/server/server.exe linux-build/server/server-mac linux-build/start.bat
+        zip -r release-linux.zip linux-build/*
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: release-windows.zip
+        files: |
+          release-windows.zip
+          release-mac.zip
+          release-linux.zip
         name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false
@@ -61,9 +115,18 @@ jobs:
         body: |
           Release ${{ github.ref_name }}
 
-          ### Running the app
+          ### Windows
           1. Download and extract release-windows.zip
           2. Double-click start.bat
-          3. The app will open automatically in your browser
 
-          No installation needed!
+          ### Mac
+          1. Download and extract release-mac.zip
+          2. Double-click start.sh
+             (If that doesn't work, open terminal and run: ./start.sh)
+
+          ### Linux
+          1. Download and extract release-linux.zip
+          2. Open terminal in the extracted folder
+          3. Run: ./start.sh
+
+          The app will open automatically in your default browser!
