@@ -38,21 +38,21 @@ jobs:
 
         chmod +x "$BUILD_DIR/server/server-mac" "$BUILD_DIR/server/server-linux"
 
-        # Create Windows start.bat - Now serving from current directory
+        # Create Windows start.bat
         echo "@echo off
         echo Starting local server...
         echo Opening http://localhost:8000 in your browser
         start http://localhost:8000
-        cd .
-        server\server.exe . --index index.html --port 8000 -v" > "$BUILD_DIR/start.bat"
+        cd browser
+        ..\server\server.exe . --index index.html --port 8000 -v" > "$BUILD_DIR/start.bat"
 
-        # Create Unix start.sh - Now serving from current directory
+        # Create Unix start.sh
         echo '#!/bin/bash
 
         # Detect OS
         case "$(uname -s)" in
-            Darwin*)    SERVER="./server/server-mac" ;;
-            Linux*)     SERVER="./server/server-linux" ;;
+            Darwin*)    SERVER="../server/server-mac" ;;
+            Linux*)     SERVER="../server/server-linux" ;;
             *)         echo "Unsupported OS" && exit 1 ;;
         esac
 
@@ -64,6 +64,7 @@ jobs:
             Linux*)     (sleep 1 && xdg-open http://localhost:8000) & ;;
         esac
 
+        cd browser
         $SERVER . --index index.html --port 8000 -v' > "$BUILD_DIR/start.sh"
 
         chmod +x "$BUILD_DIR/start.sh"
@@ -82,11 +83,7 @@ jobs:
 
         To stop:
         - Windows: Close the black command window
-        - Mac/Linux: Press Ctrl+C in the terminal
-
-        Troubleshooting:
-        - If you see 404 errors, make sure all files are in the same directory
-        - Check the terminal window for any error messages" > "$BUILD_DIR/README.txt"
+        - Mac/Linux: Press Ctrl+C in the terminal" > "$BUILD_DIR/README.txt"
 
         # Create platform-specific zips
         cp -r "$BUILD_DIR" windows-build
@@ -115,7 +112,7 @@ jobs:
         name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false
-        token: ${{ secrets.TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         body: |
           Release ${{ github.ref_name }}
 
@@ -134,8 +131,3 @@ jobs:
           3. Run: ./start.sh
 
           The app will open automatically in your default browser!
-
-          Troubleshooting:
-          - Make sure to extract ALL files from the zip
-          - Keep all files in the same directory
-          - If you see 404 errors, try closing the server and starting again
