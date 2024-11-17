@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -24,23 +24,57 @@ jobs:
     - name: Build
       run: npm run build --configuration=production
 
-    - name: Zip artifact
+    - name: Download static server
+      run: |
+        mkdir -p dist/*/server
+        # Download miniserve for different platforms
+        curl -L https://github.com/svenstaro/miniserve/releases/download/v0.25.0/miniserve-0.25.0-x86_64-pc-windows-msvc.exe -o dist/*/server/server.exe
+        curl -L https://github.com/svenstaro/miniserve/releases/download/v0.25.0/miniserve-0.25.0-x86_64-apple-darwin -o dist/*/server/server-mac
+        curl -L https://github.com/svenstaro/miniserve/releases/download/v0.25.0/miniserve-0.25.0-x86_64-unknown-linux-gnu -o dist/*/server/server-linux
+        chmod +x dist/*/server/server-mac dist/*/server/server-linux
+
+    - name: Create start scripts
+      run: |
+        # Windows batch script
+        cat > dist/*/start.bat << 'EOL'
+        @echo off
+        echo Starting local server...
+        echo Opening http://localhost:8000 in your browser
+        start http://localhost:8000
+        server\server.exe --index index.html --port 8000
+        EOL
+
+        # Simple README
+        cat > dist/*/README.txt << 'EOL'
+        To run the application:
+
+        Windows:
+        1. Double-click start.bat
+        2. Browser will open automatically to http://localhost:8000
+
+        The app window should open automatically in your default browser.
+        To stop: Close the black command window
+        EOL
+
+    - name: Zip Windows version
       run: |
         cd dist/*
-        zip -r ../../release.zip .
+        zip -r ../../release-windows.zip . -x "server/server-mac" -x "server/server-linux"
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: release.zip
+        files: release-windows.zip
         name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false
         token: ${{ secrets.TOKEN }}
         body: |
           Release ${{ github.ref_name }}
+
+          ### Running the app (Windows)
+          1. Download and extract release-windows.zip
+          2. Double-click start.bat
+          3. The app will open automatically in your browser
           
-          ### Installation
-          1. Download the zip file
-          2. Extract to desired location
-          3. Open index.html in a browser
+          No installation needed! Just double-click and go.
