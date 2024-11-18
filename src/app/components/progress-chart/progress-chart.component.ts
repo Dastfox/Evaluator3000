@@ -330,8 +330,8 @@ export class ProgressChartComponent implements OnInit, OnDestroy {
 
   getGradeDisplayText(value: number): string {
     if (value === 0) return 'Non évalué';
-    if (value === 100) return 'Atteind';
-    if (value <= 60) return 'Non Atteinds';
+    if (value === 100) return 'Atteinte';
+    if (value <= 60) return 'Non Atteinte';
     return 'Partiellement Atteinds';
   }
 }
