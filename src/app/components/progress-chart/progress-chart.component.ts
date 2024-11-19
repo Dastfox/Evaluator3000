@@ -332,6 +332,6 @@ export class ProgressChartComponent implements OnInit, OnDestroy {
     if (value === 0) return 'Non évalué';
     if (value === 100) return 'Atteinte';
     if (value <= 60) return 'Non Atteinte';
-    return 'Partiellement Atteinds';
+    return 'Partiellement Atteinte';
   }
 }
